@@ -1,0 +1,82 @@
+# Define the startup directory and the default Windows startup folder
+$sourceStartupDir = "C:\Path\To\Your\Startup\Directory"  # Replace with your startup directory path
+$windowsStartupFolder = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup"
+
+# Function to check if winget is installed
+function Check-Winget {
+    Write-Host "Checking if winget is installed..."
+    try {
+        $wingetVersion = winget --version
+        if ($wingetVersion) {
+            Write-Host "Winget is installed. Version: $wingetVersion"
+            return $true
+        }
+    } catch {
+        Write-Host "Winget is not installed."
+        return $false
+    }
+}
+
+# Function to install winget from GitHub
+function Install-Winget {
+    Write-Host "Installing winget from GitHub..."
+    $wingetUrl = "https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
+    $tempFile = "$env:TEMP\Microsoft.DesktopAppInstaller.msixbundle"
+
+    try {
+        Write-Host "Downloading winget installer..."
+        Invoke-WebRequest -Uri $wingetUrl -OutFile $tempFile
+        Write-Host "Installing winget..."
+        Add-AppxPackage -Path $tempFile
+        Write-Host "Winget installed successfully."
+    } catch {
+        Write-Host "Failed to install winget. Error: $_"
+        exit 1
+    }
+}
+
+# Check if winget is installed, and install it if necessary
+if (-not (Check-Winget)) {
+    Install-Winget
+}
+
+# Copy files from the custom startup directory to the Windows startup folder
+Write-Host "Copying files from $sourceStartupDir to $windowsStartupFolder..."
+if (Test-Path $sourceStartupDir) {
+    Copy-Item -Path "$sourceStartupDir\*" -Destination $windowsStartupFolder -Recurse -Force
+    Write-Host "Files copied successfully."
+} else {
+    Write-Host "Source startup directory does not exist. Please check the path."
+}
+
+# Install software using winget
+Write-Host "Installing software using winget..."
+
+# List of software to install
+$softwareList = @(
+    "Microsoft.PowerToys",
+    "Microsoft.VisualStudioCode",
+    "Adobe.Acrobat.Reader.64",
+    "voidtools.Everything",
+    "Git.Git",
+    "AutoHotkey.AutoHotkey",
+    "7zip.7zip",
+    "GitHub.cli",
+    "Python.Python.3",
+    "WiresharkFoundation.Wireshark",
+    "TeraTerm.TeraTerm",
+    "WinSCP.WinSCP",
+    "PuTTY.PuTTY"
+)
+
+foreach ($software in $softwareList) {
+    Write-Host "Installing $software..."
+    try {
+        winget install --id $software --silent --accept-package-agreements --accept-source-agreements
+        Write-Host "$software installed successfully."
+    } catch {
+        Write-Host "Failed to install $software. Error: $_"
+    }
+}
+
+Write-Host "All tasks completed."
