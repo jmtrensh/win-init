@@ -53,10 +53,9 @@ if (Test-Path $sourceStartupDir) {
 # Install software using winget
 Write-Host "Installing software using winget..."
 
-# List of software to install
+# List of software to install always
 $softwareList = @(
     "Microsoft.PowerToys",
-    "Microsoft.VisualStudioCode",
     "Adobe.Acrobat.Reader.64", # may delete due to 
     "voidtools.Everything.Alpha", # Alpha for dark mode
     "Git.Git",
@@ -70,14 +69,32 @@ $softwareList = @(
     "ShareX.ShareX",
     "GitExtensionsTeam.GitExtensions",
     "Bruno.Bruno",
+    "15722UsefulApp.WorkspaceLauncherForVSCode",
+    "Proton.ProtonPass"
 )
 
-# Work Only Programs
+# Work Only Software
 $workOnlySoftware = @(
     "ScooterSoftware.BeyondCompare.5", # Needs License
     "WiresharkFoundation.Wireshark",
+    "Microsoft.VisualStudioCode",
+    "JRSoftware.InnoSetup",
+    "NitroSoftware.NitroPDFPro"
 )
 
+# Personal Only Software
+$personalOnlySoftware = @(
+    "Brave.Brave",
+    "Spotify.Spotify",
+    "VideoLAN.VLC",
+    "FreeCAD.FreeCAD",
+    "Inkscape.Inkscape",
+    "LibreOffice.LibreOffice",
+    "VSCodium.VSCodium",
+    "LibreCAD.LibreCAD"
+)
+
+# TODO: Clean this up
 foreach ($software in $softwareList) {
     Write-Host "Installing $software..."
     try {
@@ -100,4 +117,20 @@ if ($work) {
         }
     }
 }
+else
+{
+    Write-Host "Installing personal-only software..."
+    foreach ($software in $personalOnlySoftware)  {
+        Write-Host "Installing $software..."
+        try {
+            winget install --id $software --silent --accept-package-agreements --accept-source-agreements
+            Write-Host "$software installed successfully."
+        } catch {
+            Write-Host "Failed to install $software. Error: $_"
+        }
+    }
+}
+
+# TODO: Add regedit for using the old Explorer context menu instead of the new one
+
 Write-Host "All tasks completed."
