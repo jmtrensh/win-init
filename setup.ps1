@@ -1,6 +1,7 @@
 # Define the startup directory and the default Windows startup folder
 $sourceStartupDir = "C:\Path\To\Your\Startup\Directory"  # Replace with your startup directory path
 $windowsStartupFolder = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup"
+$work = $false  # Set to $true if installing work-only programs
 
 # Function to check if winget is installed
 function Check-Winget {
@@ -56,17 +57,25 @@ Write-Host "Installing software using winget..."
 $softwareList = @(
     "Microsoft.PowerToys",
     "Microsoft.VisualStudioCode",
-    "Adobe.Acrobat.Reader.64",
-    "voidtools.Everything",
+    "Adobe.Acrobat.Reader.64", # may delete due to 
+    "voidtools.Everything.Alpha", # Alpha for dark mode
     "Git.Git",
     "AutoHotkey.AutoHotkey",
     "7zip.7zip",
     "GitHub.cli",
     "Python.Python.3",
-    "WiresharkFoundation.Wireshark",
     "TeraTerm.TeraTerm",
     "WinSCP.WinSCP",
-    "PuTTY.PuTTY"
+    "PuTTY.PuTTY",
+    "ShareX.ShareX",
+    "GitExtensionsTeam.GitExtensions",
+    "Bruno.Bruno",
+)
+
+# Work Only Programs
+$workOnlySoftware = @(
+    "ScooterSoftware.BeyondCompare.5", # Needs License
+    "WiresharkFoundation.Wireshark",
 )
 
 foreach ($software in $softwareList) {
@@ -79,4 +88,16 @@ foreach ($software in $softwareList) {
     }
 }
 
+if ($work) {
+    Write-Host "Installing work-only software..."
+    foreach ($software in $workOnlySoftware)  {
+        Write-Host "Installing $software..."
+        try {
+            winget install --id $software --silent --accept-package-agreements --accept-source-agreements
+            Write-Host "$software installed successfully."
+        } catch {
+            Write-Host "Failed to install $software. Error: $_"
+        }
+    }
+}
 Write-Host "All tasks completed."
